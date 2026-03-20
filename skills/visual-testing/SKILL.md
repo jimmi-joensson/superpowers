@@ -68,8 +68,7 @@ Before starting, detect what's available in the project. Use the first matching 
 
 | Tool | Comparison Method | Best For |
 |------|-------------------|----------|
-| Playwright | `expect(screenshot).toMatchSnapshot()` | Pixel-perfect regression (recommended) |
-| Puppeteer | `page.screenshot()` + pixel diff library | Lightweight capture |
+| Playwright | `expect(screenshot).toMatchSnapshot()` | Pixel-perfect regression (**recommended**) |
 | Cypress | `cy.screenshot()` + Percy/Applitools | Integration test flows |
 | Browser MCP | Screenshot + AI visual analysis | Ad-hoc inspection |
 

@@ -59,7 +59,7 @@ Before starting, discover what capture and design-source tools are available:
 
 | Capability | Example Tools |
 |------------|---------------|
-| Screenshot capture | Maestro MCP, Playwright, Puppeteer, browser MCP, simulator screenshot CLI |
+| Screenshot capture | Playwright (web, recommended), Maestro MCP (mobile), browser MCP, simulator screenshot CLI |
 | Design source | Figma MCP, local mockup images, design tokens file, reference URL |
 | Element inspection | Maestro `inspect_view_hierarchy`, browser DevTools MCP, Playwright locators |
 | Navigation | Maestro flows, Playwright actions, browser MCP navigation |

@@ -6,13 +6,12 @@ Comparison of tools for capturing and comparing UI screenshots. Choose based on 
 
 | Tool | Platform | Capture | Comparison | Best For |
 |------|----------|---------|------------|----------|
-| Playwright | Web | Built-in | Pixel diff (toMatchSnapshot) | Web apps, cross-browser |
-| Maestro | iOS, Android, Web | MCP or CLI | AI analysis / external diff | Mobile apps, React Native |
-| Puppeteer | Web (Chrome) | Built-in | External diff library | Chrome-specific, headless |
+| Playwright | Web | Built-in | Pixel diff (toMatchSnapshot) | Web apps, cross-browser (**recommended for web**) |
+| Maestro | iOS, Android, Web | MCP or CLI | AI analysis / external diff | Mobile apps, React Native (**recommended for mobile**) |
 | Cypress | Web | Plugin | Percy / external | E2E with visual regression |
 | Storybook + Chromatic | Components | Automatic | Cloud visual diff | Component libraries |
 | Percy (BrowserStack) | Web, Mobile | SDK | Cloud visual diff | CI/CD visual regression |
-| BackstopJS | Web | Puppeteer/Playwright | Built-in pixel diff | Quick visual regression |
+| BackstopJS | Web | Playwright | Built-in pixel diff | Quick visual regression |
 | Applitools | Web, Mobile | SDK | AI-powered visual diff | Cross-platform, smart comparison |
 
 ## Detailed Profiles

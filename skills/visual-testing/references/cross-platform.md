@@ -7,7 +7,7 @@ Strategies for testing visual consistency across platforms and devices.
 | Dimension | Options | Tool Support |
 |-----------|---------|-------------|
 | OS | iOS, Android, Web | Maestro (all), Playwright (web), Detox (mobile) |
-| Browser | Chromium, Firefox, WebKit | Playwright (all), Puppeteer (Chromium) |
+| Browser | Chromium, Firefox, WebKit | Playwright (all three) |
 | Viewport | Mobile, Tablet, Desktop | All tools |
 | Theme | Light, Dark | All tools (with setup) |
 | Locale | LTR, RTL, various lengths | All tools (with config) |
