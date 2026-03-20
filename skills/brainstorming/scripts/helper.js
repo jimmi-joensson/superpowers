@@ -7,10 +7,22 @@
     ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
-      // Swap-and-drain: prevents loss if a send error re-queues an event
+      // Swap-and-drain: atomically move queued events so new events
+      // during flush go to the fresh array, not the one being drained.
       const pending = eventQueue;
       eventQueue = [];
-      pending.forEach(e => ws.send(JSON.stringify(e)));
+      for (const e of pending) {
+        if (ws.readyState === WebSocket.OPEN) {
+          try {
+            ws.send(JSON.stringify(e));
+          } catch (err) {
+            eventQueue.push(e);
+          }
+        } else {
+          // Connection closed mid-flush — re-queue the rest
+          eventQueue.push(e);
+        }
+      }
     };
 
     ws.onmessage = (msg) => {

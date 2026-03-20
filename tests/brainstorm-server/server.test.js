@@ -379,6 +379,116 @@ async function runTests() {
       assert(stdoutAccum.includes('screen-updated'), 'Should log screen-updated');
     });
 
+    // ========== Concurrent / Race Condition Scenarios ==========
+    console.log('\n--- Concurrent Scenarios ---');
+
+    await test('broadcast delivers to all clients when one disconnects mid-broadcast', async () => {
+      // Connect 5 clients, then close one while a broadcast is in-flight
+      const sockets = [];
+      for (let i = 0; i < 5; i++) {
+        const s = new WebSocket(`ws://localhost:${TEST_PORT}`);
+        await new Promise(resolve => s.on('open', resolve));
+        sockets.push(s);
+      }
+
+      // Close client 2 abruptly (simulates mid-broadcast disconnect)
+      sockets[2].terminate();
+      await sleep(50);
+
+      // Trigger a broadcast via file change
+      const received = sockets.map(() => false);
+      sockets.forEach((s, i) => {
+        if (i === 2) return; // terminated
+        s.on('message', (data) => {
+          if (JSON.parse(data.toString()).type === 'reload') received[i] = true;
+        });
+      });
+
+      fs.writeFileSync(path.join(TEST_DIR, 'race-broadcast.html'), '<h2>Race</h2>');
+      await sleep(500);
+
+      // All surviving clients should have received the broadcast
+      for (let i = 0; i < 5; i++) {
+        if (i === 2) continue;
+        assert(received[i], `Client ${i} should receive reload`);
+      }
+      sockets.forEach((s, i) => { if (i !== 2) s.close(); });
+    });
+
+    await test('rapid connect/disconnect does not corrupt client pool', async () => {
+      const CLIENTS = 10;
+      const opened = [];
+      // Rapidly open and close connections
+      for (let i = 0; i < CLIENTS; i++) {
+        const s = new WebSocket(`ws://localhost:${TEST_PORT}`);
+        await new Promise(resolve => s.on('open', resolve));
+        opened.push(s);
+      }
+      // Close half immediately
+      for (let i = 0; i < CLIENTS; i += 2) {
+        opened[i].terminate();
+      }
+      await sleep(100);
+
+      // Surviving clients should still receive broadcasts
+      const survivors = opened.filter((_, i) => i % 2 === 1);
+      const got = survivors.map(() => false);
+      survivors.forEach((s, i) => {
+        s.on('message', (data) => {
+          if (JSON.parse(data.toString()).type === 'reload') got[i] = true;
+        });
+      });
+
+      fs.writeFileSync(path.join(TEST_DIR, 'rapid-connect.html'), '<h2>Rapid</h2>');
+      await sleep(500);
+
+      for (let i = 0; i < survivors.length; i++) {
+        assert(got[i], `Survivor ${i} should receive broadcast`);
+      }
+      survivors.forEach(s => s.close());
+    });
+
+    await test('high-frequency messages are all received by server', async () => {
+      stdoutAccum = '';
+      const ws = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      await new Promise(resolve => ws.on('open', resolve));
+
+      const COUNT = 50;
+      for (let i = 0; i < COUNT; i++) {
+        ws.send(JSON.stringify({ type: 'ping', seq: i }));
+      }
+      await sleep(1000);
+
+      let received = 0;
+      for (let i = 0; i < COUNT; i++) {
+        if (stdoutAccum.includes(`"seq":${i}`)) received++;
+      }
+      assert.strictEqual(received, COUNT, `All ${COUNT} messages should arrive, got ${received}`);
+      ws.close();
+    });
+
+    await test('broadcast during client connect does not skip new client', async () => {
+      // Open a client, trigger a broadcast, then verify a second client
+      // connected just before the broadcast still works afterward
+      const ws1 = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      await new Promise(resolve => ws1.on('open', resolve));
+
+      const ws2 = new WebSocket(`ws://localhost:${TEST_PORT}`);
+      await new Promise(resolve => ws2.on('open', resolve));
+
+      let ws2Got = false;
+      ws2.on('message', (data) => {
+        if (JSON.parse(data.toString()).type === 'reload') ws2Got = true;
+      });
+
+      fs.writeFileSync(path.join(TEST_DIR, 'during-connect.html'), '<h2>During</h2>');
+      await sleep(500);
+
+      assert(ws2Got, 'Newly connected client should receive broadcast');
+      ws1.close();
+      ws2.close();
+    });
+
     // ========== Helper.js Content ==========
     console.log('\n--- Helper.js Verification ---');
 

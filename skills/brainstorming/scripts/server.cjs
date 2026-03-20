@@ -166,17 +166,10 @@ function handleUpgrade(req, socket) {
   const key = req.headers['sec-websocket-key'];
   if (!key) { socket.destroy(); return; }
 
-  const accept = computeAcceptKey(key);
-  socket.write(
-    'HTTP/1.1 101 Switching Protocols\r\n' +
-    'Upgrade: websocket\r\n' +
-    'Connection: Upgrade\r\n' +
-    'Sec-WebSocket-Accept: ' + accept + '\r\n\r\n'
-  );
-
   let buffer = Buffer.alloc(0);
-  clients.add(socket);
 
+  // Register event handlers BEFORE completing the handshake so no
+  // incoming data or disconnect events can be missed.
   socket.on('data', (chunk) => {
     buffer = Buffer.concat([buffer, chunk]);
     while (buffer.length > 0) {
@@ -217,6 +210,17 @@ function handleUpgrade(req, socket) {
 
   socket.on('close', () => clients.delete(socket));
   socket.on('error', () => clients.delete(socket));
+
+  // Complete handshake and add to pool only after handlers are ready.
+  const accept = computeAcceptKey(key);
+  socket.write(
+    'HTTP/1.1 101 Switching Protocols\r\n' +
+    'Upgrade: websocket\r\n' +
+    'Connection: Upgrade\r\n' +
+    'Sec-WebSocket-Accept: ' + accept + '\r\n\r\n'
+  );
+
+  clients.add(socket);
 }
 
 function handleMessage(text) {
