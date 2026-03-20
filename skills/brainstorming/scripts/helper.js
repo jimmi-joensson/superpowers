@@ -7,8 +7,10 @@
     ws = new WebSocket(WS_URL);
 
     ws.onopen = () => {
-      eventQueue.forEach(e => ws.send(JSON.stringify(e)));
+      // Swap-and-drain: prevents loss if a send error re-queues an event
+      const pending = eventQueue;
       eventQueue = [];
+      pending.forEach(e => ws.send(JSON.stringify(e)));
     };
 
     ws.onmessage = (msg) => {
@@ -26,7 +28,12 @@
   function sendEvent(event) {
     event.timestamp = Date.now();
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(event));
+      try {
+        ws.send(JSON.stringify(event));
+      } catch (e) {
+        // Connection closed between readyState check and send — queue for retry
+        eventQueue.push(event);
+      }
     } else {
       eventQueue.push(event);
     }

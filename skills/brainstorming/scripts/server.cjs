@@ -237,9 +237,18 @@ function handleMessage(text) {
 
 function broadcast(msg) {
   const frame = encodeFrame(OPCODES.TEXT, Buffer.from(JSON.stringify(msg)));
-  for (const socket of clients) {
-    try { socket.write(frame); } catch (e) { clients.delete(socket); }
+  // Snapshot the Set to avoid iterator corruption when a failed write
+  // causes a delete (or a close/error event fires between writes).
+  const snapshot = [...clients];
+  const dead = [];
+  for (const socket of snapshot) {
+    if (socket.destroyed || !socket.writable) {
+      dead.push(socket);
+      continue;
+    }
+    try { socket.write(frame); } catch (e) { dead.push(socket); }
   }
+  for (const socket of dead) clients.delete(socket);
 }
 
 // ========== Activity Tracking ==========
