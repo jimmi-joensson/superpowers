@@ -1,0 +1,16 @@
+{
+  "name": "user-api-example",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Example Express API with input validation on POST /api/users",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-validator": "^7.0.0"
+  },
+  "devDependencies": {}
+}
