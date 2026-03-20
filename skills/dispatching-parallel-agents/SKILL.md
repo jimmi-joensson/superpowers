@@ -109,6 +109,74 @@ Do NOT just increase timeouts - find the real issue.
 Return: Summary of what you found and what you fixed.
 ```
 
+## Model Selection for Parallel Tasks
+
+Not all parallel tasks need the same model. Match model capability to task type — use premium capacity for reasoning-heavy work, fast models for mechanical execution.
+
+**REQUIRED REFERENCE:** Read `using-superpowers/references/model-selection.md` for how to discover available models and classify them into tiers (premium / standard / fast).
+
+### Classify Each Parallel Task
+
+Before dispatching, classify each task:
+
+```dot
+digraph model_selection {
+    "For each parallel task" [shape=box];
+    "Does it require investigation, reasoning, or synthesis?" [shape=diamond];
+    "Is the scope well-defined with a clear spec?" [shape=diamond];
+    "Premium or Standard tier" [shape=box style=filled fillcolor=lightyellow];
+    "Standard tier" [shape=box style=filled fillcolor=lightblue];
+    "Fast tier" [shape=box style=filled fillcolor=lightgreen];
+
+    "For each parallel task" -> "Does it require investigation, reasoning, or synthesis?";
+    "Does it require investigation, reasoning, or synthesis?" -> "Premium or Standard tier" [label="yes - research/analysis"];
+    "Does it require investigation, reasoning, or synthesis?" -> "Is the scope well-defined with a clear spec?" [label="no"];
+    "Is the scope well-defined with a clear spec?" -> "Fast tier" [label="yes - mechanical execution"];
+    "Is the scope well-defined with a clear spec?" -> "Standard tier" [label="no - needs some judgment"];
+}
+```
+
+**Task type signals:**
+
+| Signal | Task type | Tier |
+|--------|-----------|------|
+| "Investigate why X fails" | Research | Standard or Premium |
+| "Debug race condition in X" | Complex debugging | Premium |
+| "Understand how X interacts with Y" | Analysis | Standard or Premium |
+| "Fix the 3 failing tests in X" (with error details) | Execution | Fast |
+| "Implement function X per this spec" | Execution | Fast |
+| "Refactor X to use pattern Y" (clear scope) | Execution | Fast or Standard |
+| "Fix X and figure out why Y is related" | Mixed | Standard |
+
+### Dispatching with Mixed Tiers
+
+Each parallel task can use a different model — and a different provider. Check your available models, classify them all into tiers, then match tier to task:
+
+```typescript
+// Investigation needs reasoning — pick a standard-tier model
+Task("Investigate auth subsystem failures - read logs, trace the request flow, identify root cause", model: "claude-sonnet-4.6")
+
+// Clear scope, known fix — any fast-tier model works
+Task("Fix typo in error messages across validation/*.ts files", model: "gpt-4.1")
+
+// Complex debugging with race conditions — use your best premium-tier model
+Task("Debug race condition in event handler - timing-dependent, requires understanding async flow", model: "claude-opus-4.6")
+
+// Well-specified implementation — fast tier, vary the provider
+Task("Implement formatCurrency per spec: Intl.NumberFormat, handle NaN, add tests", model: "gpt-5.4-mini")
+```
+
+**Use the full range of your available models.** Don't default to one provider — if you have fast-tier models from multiple providers, distribute across them.
+
+### Escalation
+
+If a parallel agent reports BLOCKED or produces poor results:
+1. **Fast → Standard:** Re-dispatch the task with a standard-tier model
+2. **Standard → Premium:** Re-dispatch with premium if the task genuinely needs deeper reasoning
+3. **Premium → Break apart:** If even premium struggles, the task may be too broad — split it into smaller parallel tasks
+
+**Don't retry with the same tier** unless you're providing substantially more context.
+
 ## Common Mistakes
 
 **❌ Too broad:** "Fix all the tests" - agent gets lost

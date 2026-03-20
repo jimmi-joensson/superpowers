@@ -88,16 +88,18 @@ digraph process {
 
 Use the least powerful model that can handle each role to conserve cost and increase speed.
 
-**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast, cheap model. Most implementation tasks are mechanical when the plan is well-specified.
+**REQUIRED REFERENCE:** Read `using-superpowers/references/model-selection.md` for how to discover available models and classify them into tiers (premium / standard / fast).
 
-**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard model.
+**Mechanical implementation tasks** (isolated functions, clear specs, 1-2 files): use a fast-tier model. Most implementation tasks are mechanical when the plan is well-specified.
 
-**Architecture, design, and review tasks**: use the most capable available model.
+**Integration and judgment tasks** (multi-file coordination, pattern matching, debugging): use a standard-tier model.
+
+**Architecture, design, and review tasks**: use the most capable available (premium-tier) model.
 
 **Task complexity signals:**
-- Touches 1-2 files with a complete spec → cheap model
-- Touches multiple files with integration concerns → standard model
-- Requires design judgment or broad codebase understanding → most capable model
+- Touches 1-2 files with a complete spec → fast tier
+- Touches multiple files with integration concerns → standard tier
+- Requires design judgment or broad codebase understanding → premium tier
 
 ## Handling Implementer Status
 
