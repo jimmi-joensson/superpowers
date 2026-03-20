@@ -137,3 +137,10 @@ From 24 failure memories:
 Run the command. Read the output. THEN claim the result.
 
 This is non-negotiable.
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| `design-review` | For visual/UI work, design review provides the evaluation evidence before claiming design is complete |
+| `visual-testing` | Visual regression tests provide screenshot evidence before claiming UI changes are done |

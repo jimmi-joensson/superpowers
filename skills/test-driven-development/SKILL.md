@@ -369,3 +369,9 @@ Otherwise → not TDD
 ```
 
 No exceptions without your human partner's permission.
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| `visual-testing` | Visual tests follow the same RED-GREEN cycle — write the visual assertion, watch it fail, implement the UI, watch it pass |

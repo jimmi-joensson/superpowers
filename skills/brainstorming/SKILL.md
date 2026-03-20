@@ -162,3 +162,10 @@ A question about a UI topic is not automatically a visual question. "What does p
 
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
+
+## Related Skills
+
+| Skill | Relationship |
+|-------|-------------|
+| `design-review` | After brainstorming produces visual designs, design review evaluates and iterates on implementation fidelity |
+| `visual-testing` | After implementation, visual testing automates regression verification of the designs explored here |

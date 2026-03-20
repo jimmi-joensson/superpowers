@@ -123,6 +123,10 @@ Start a new session in your chosen platform and ask for something that should tr
 **Testing**
 - **test-driven-development** - RED-GREEN-REFACTOR cycle (includes testing anti-patterns reference)
 
+**Visual/Design**
+- **design-review** - Autonomous UI evaluation against design sources with capture → compare → fix → re-capture loop
+- **visual-testing** - Automated visual regression testing across tools (Playwright, Maestro, Storybook) and platforms
+
 **Debugging**
 - **systematic-debugging** - 4-phase root cause process (includes root-cause-tracing, defense-in-depth, condition-based-waiting techniques)
 - **verification-before-completion** - Ensure it's actually fixed
